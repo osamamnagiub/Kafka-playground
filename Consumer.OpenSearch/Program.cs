@@ -17,6 +17,7 @@ namespace Consumer.OpenSearch
                 GroupId = "consumer-opensearch-demo",
                 BootstrapServers = "localhost:9092",
                 AutoOffsetReset = AutoOffsetReset.Earliest,
+                FetchMaxBytes = 10_000 // to allow batches
             };
 
             var cts = new CancellationTokenSource();
@@ -26,11 +27,9 @@ namespace Consumer.OpenSearch
                 cts.Cancel();
             };
 
-            using (var openSearchHelper = new OpenSearchHelper(indexName, openSearchUri))
-            using (var kafkaConsumerHelper = new KafkaConsumerHelper(topic, consumerConfig, openSearchHelper))
-            {
-                kafkaConsumerHelper.Consume(cts);
-            }
+            using var openSearchHelper = new OpenSearchHelper(indexName, openSearchUri);
+            using var kafkaConsumerHelper = new KafkaConsumerHelper(topic, consumerConfig, openSearchHelper);
+            kafkaConsumerHelper.Consume(cts);
         }
     }
 }
